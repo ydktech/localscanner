@@ -1,0 +1,47 @@
+{
+  "name": "localscanner",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ydktech/localscanner.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/ydktech/localscanner/issues"
+  },
+  "homepage": "https://github.com/ydktech/localscanner#readme",
+  "dependencies": {
+    "@googlemaps/google-maps-services-js": "^3.4.2",
+    "@googlemaps/js-api-loader": "^1.16.10",
+    "@supabase/supabase-js": "^2.50.3",
+    "@types/node": "^24.0.10",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "axios": "^1.10.0",
+    "eslint": "^9.30.1",
+    "eslint-config-next": "^15.3.5",
+    "lucide-react": "^0.525.0",
+    "next": "^15.3.5",
+    "openai": "^5.8.2",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "typescript": "^5.8.3"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.53.2",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.17"
+  }
+}
