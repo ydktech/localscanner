@@ -1,0 +1,11 @@
+google-cloud-aiplatform
+requests
+flask
+python-dotenv
+streamlit
+playwright
+asyncio
+crawl4ai
+googlemaps>=4.10.0
+pandas>=2.0.0
+vertexai
