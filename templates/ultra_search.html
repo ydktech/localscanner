@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -23,7 +24,7 @@
             margin: 0 auto;
             background: white;
             border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             overflow: hidden;
         }
 
@@ -85,7 +86,8 @@
             margin-bottom: 20px;
         }
 
-        .settings input, .settings select {
+        .settings input,
+        .settings select {
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 5px;
@@ -126,7 +128,7 @@
             width: 100%;
             height: 500px;
             border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
 
         .results-section {
@@ -209,8 +211,98 @@
             margin: 0 0 10px 0;
             color: #e65100;
         }
+
+        .timing-info {
+            background: #f3e5f5;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #9c27b0;
+        }
+
+        .timing-info h4 {
+            margin: 0 0 10px 0;
+            color: #6a1b9a;
+        }
+
+        .timing-step {
+            background: white;
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border: 1px solid #e1bee7;
+            font-size: 14px;
+        }
+
+        .timing-step strong {
+            color: #7b1fa2;
+        }
+
+        .loading-indicator {
+            background: #e1f5fe;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #03a9f4;
+            text-align: center;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #03a9f4;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .progress-step {
+            background: #f0f4f8;
+            padding: 10px 15px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border-left: 3px solid #2196f3;
+        }
+
+        .progress-step.active {
+            background: #e3f2fd;
+            border-left: 3px solid #1976d2;
+            animation: pulse 2s infinite;
+        }
+
+        .progress-step.completed {
+            background: #e8f5e8;
+            border-left: 3px solid #4caf50;
+        }
+
+        @keyframes pulse {
+            0% {
+                background: #e3f2fd;
+            }
+
+            50% {
+                background: #bbdefb;
+            }
+
+            100% {
+                background: #e3f2fd;
+            }
+        }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="header">
@@ -220,15 +312,11 @@
 
         <div class="search-section">
             <div class="search-form">
-                <input type="text" id="koreanInput" class="search-input" placeholder="한국어로 찾고 싶은 곳을 입력하세요 (예: 점심밥, 맛있는 식당, 브런치 카페)">
+                <input type="text" id="koreanInput" class="search-input"
+                    placeholder="한국어로 찾고 싶은 곳을 입력하세요 (예: 점심밥, 맛있는 식당, 브런치 카페)">
                 <button onclick="search()" class="search-btn">🔍 검색</button>
             </div>
 
-            <div class="settings">
-                <input type="text" id="locationInput" placeholder="위치 (예: Tokyo, Japan)" value="Tokyo, Japan">
-                <input type="number" id="radiusInput" placeholder="반경 (미터)" value="5000" min="500" max="50000">
-                <button onclick="getCurrentLocation()" class="search-btn" style="padding: 10px 20px; font-size: 14px;">📍 현재 위치</button>
-            </div>
 
             <div id="keywordsSection" class="keywords-section" style="display: none;">
                 <div class="keyword-group">
@@ -239,10 +327,7 @@
                     <h3>🔄 추상적 번역</h3>
                     <div id="abstractTranslations"></div>
                 </div>
-                <div class="keyword-group">
-                    <h3>🔧 필터 키워드</h3>
-                    <div id="filterKeywords"></div>
-                </div>
+
             </div>
 
             <div id="messageArea"></div>
@@ -279,20 +364,24 @@
                     {
                         "featureType": "all",
                         "elementType": "geometry.fill",
-                        "stylers": [{"weight": "2.00"}]
+                        "stylers": [{ "weight": "2.00" }]
                     },
                     {
                         "featureType": "all",
                         "elementType": "geometry.stroke",
-                        "stylers": [{"color": "#9c9c9c"}]
+                        "stylers": [{ "color": "#9c9c9c" }]
                     },
                     {
                         "featureType": "all",
                         "elementType": "labels.text",
-                        "stylers": [{"visibility": "on"}]
+                        "stylers": [{ "visibility": "on" }]
                     }
                 ]
             });
+
+            // Show initial GPS status and get current location
+            showMessage('🔄 GPS 위치를 확인 중입니다...', 'info');
+            getCurrentLocationAuto();
         }
 
         function clearMarkers() {
@@ -365,50 +454,40 @@
             const R = 6371; // Earth's radius in km
             const dLat = (lat2 - lat1) * Math.PI / 180;
             const dLng = (lng2 - lng1) * Math.PI / 180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                    Math.sin(dLng/2) * Math.sin(dLng/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLng / 2) * Math.sin(dLng / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
             return R * c;
         }
 
-        function getCurrentLocation() {
+        function getCurrentLocationAuto() {
             if (navigator.geolocation) {
-                showMessage('📍 현재 위치를 확인하고 있습니다...', 'info');
-                
+                console.log('Getting current location automatically...');
+
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
                         userLocation = {
                             lat: position.coords.latitude,
                             lng: position.coords.longitude
                         };
-                        
-                        // Update location input with coordinates
-                        document.getElementById('locationInput').value = `${userLocation.lat},${userLocation.lng}`;
-                        
+
+                        // Location coordinates stored in userLocation variable
+
                         // Center map on user location
                         map.setCenter(userLocation);
                         map.setZoom(15);
-                        
+
                         // Add user location marker
                         addUserLocationMarker();
-                        
-                        showMessage('✅ 현재 위치를 확인했습니다! 이제 검색해보세요.', 'success');
+
+                        console.log('Current location set successfully');
+                        showMessage(`📍 GPS 위치 확인됨: ${userLocation.lat.toFixed(6)}, ${userLocation.lng.toFixed(6)}`, 'success');
                     },
                     (error) => {
-                        let errorMessage = '위치 정보를 가져올 수 없습니다.';
-                        switch(error.code) {
-                            case error.PERMISSION_DENIED:
-                                errorMessage = '위치 권한이 거부되었습니다. 브라우저 설정에서 위치 권한을 허용해주세요.';
-                                break;
-                            case error.POSITION_UNAVAILABLE:
-                                errorMessage = '위치 정보를 사용할 수 없습니다.';
-                                break;
-                            case error.TIMEOUT:
-                                errorMessage = '위치 정보 요청이 시간 초과되었습니다.';
-                                break;
-                        }
-                        showMessage(errorMessage, 'error');
+                        console.error('GPS 위치 오류:', error.message);
+                        showMessage('⚠️ 위치 접근 권한이 거부되었습니다. 정확한 검색을 위해 브라우저 설정에서 위치 권한을 허용해주세요.', 'warning');
+                        // Silently fail and keep default Tokyo location
                     },
                     {
                         enableHighAccuracy: true,
@@ -417,7 +496,7 @@
                     }
                 );
             } else {
-                showMessage('이 브라우저는 위치 정보를 지원하지 않습니다.', 'error');
+                console.log('Geolocation not supported, using default Tokyo location');
             }
         }
 
@@ -426,9 +505,46 @@
             messageArea.innerHTML = `<div class="${type}">${message}</div>`;
         }
 
+        function showLoadingIndicator() {
+            const messageArea = document.getElementById('messageArea');
+            messageArea.innerHTML = `
+                <div class="loading-indicator">
+                    <div class="loading-spinner"></div>
+                    <strong>🔍 Ultra Search 실행 중...</strong>
+                </div>
+                <div id="progressSteps">
+                    <div class="progress-step active" id="step1">⏳ AI 키워드 생성 중...</div>
+                    <div class="progress-step" id="step2">⏳ 추상 번역 검색 대기 중...</div>
+                    <div class="progress-step" id="step3">⏳ 카테고리 검색 대기 중...</div>
+                    <div class="progress-step" id="step4">⏳ 결과 정리 대기 중...</div>
+                </div>
+            `;
+        }
+
+        function updateProgress(stepNumber, message, completed = false) {
+            const step = document.getElementById(`step${stepNumber}`);
+            if (step) {
+                step.innerHTML = message;
+                step.classList.remove('active');
+                if (completed) {
+                    step.classList.add('completed');
+                } else {
+                    step.classList.add('active');
+                }
+            }
+
+            // Activate next step if current is completed
+            if (completed && stepNumber < 4) {
+                const nextStep = document.getElementById(`step${stepNumber + 1}`);
+                if (nextStep && !nextStep.classList.contains('completed')) {
+                    nextStep.classList.add('active');
+                }
+            }
+        }
+
         function showKeywords(keywords) {
             document.getElementById('keywordsSection').style.display = 'grid';
-            
+
             // Direct translations
             const directDiv = document.getElementById('directTranslations');
             directDiv.innerHTML = '';
@@ -443,33 +559,61 @@
                 abstractDiv.innerHTML += `<div class="keyword-item">${keyword}</div>`;
             });
 
-            // Filter keywords
-            const filterDiv = document.getElementById('filterKeywords');
-            filterDiv.innerHTML = '';
-            keywords.filter_keywords.forEach(keyword => {
-                filterDiv.innerHTML += `<div class="keyword-item">${keyword}</div>`;
-            });
+
         }
 
         function showCostInfo(keywords) {
             const messageArea = document.getElementById('messageArea');
-            
+
             if (keywords.api_calls && keywords.estimated_cost_usd) {
                 const costHtml = `
                     <div class="cost-info">
                         <h4>💰 API 사용량 및 비용</h4>
+                        <p><strong>검색 전략:</strong> ${keywords.search_strategy || 'Progressive Radius Search'}</p>
                         <p><strong>API 호출 수:</strong> ${keywords.api_calls}회</p>
                         <p><strong>예상 비용:</strong> $${keywords.estimated_cost_usd} (약 ${keywords.estimated_cost_krw}원)</p>
-                        <p><small>* 배치 검색으로 최적화되어 기존 대비 약 80% 비용 절감</small></p>
+                        <p><small>* 점진적 반경 검색으로 가장 가까운 장소 우선 탐색</small></p>
                     </div>
                 `;
                 messageArea.innerHTML += costHtml;
             }
         }
 
+        function showTimingInfo(keywords) {
+            const messageArea = document.getElementById('messageArea');
+
+            // Show LLM timing from ultra_search.py
+            if (keywords.timing) {
+                let timingHtml = `
+                    <div class="timing-info">
+                        <h4>⏱️ LLM 키워드 생성 시간</h4>
+                        <div class="timing-step"><strong>Vertex AI 초기화:</strong> ${keywords.timing.vertex_init_time}초</div>
+                        <div class="timing-step"><strong>LLM 키워드 생성:</strong> ${keywords.timing.llm_generation_time}초</div>
+                        <div class="timing-step"><strong>전체 키워드 생성:</strong> ${keywords.timing.total_time}초</div>
+                    </div>
+                `;
+                messageArea.innerHTML += timingHtml;
+            }
+
+            // Show search timing from flask_app.py
+            if (keywords.search_timing) {
+                let searchTimingHtml = `
+                    <div class="timing-info">
+                        <h4>🔍 검색 실행 시간</h4>
+                        <div class="timing-step"><strong>키워드 생성:</strong> ${keywords.search_timing.keyword_generation_time}초</div>
+                        <div class="timing-step"><strong>추상 번역 검색:</strong> ${keywords.search_timing.abstract_search_time}초</div>
+                        <div class="timing-step"><strong>카테고리 검색:</strong> ${keywords.search_timing.category_search_time}초</div>
+                        <div class="timing-step"><strong>API 검색 총 시간:</strong> ${keywords.search_timing.api_search_time}초</div>
+                        <div class="timing-step"><strong>전체 검색 시간:</strong> ${keywords.search_timing.total_search_time}초</div>
+                    </div>
+                `;
+                messageArea.innerHTML += searchTimingHtml;
+            }
+        }
+
         function showResults(places) {
             const resultsArea = document.getElementById('resultsArea');
-            
+
             if (places.length === 0) {
                 resultsArea.innerHTML = '<div class="error">검색 결과가 없습니다.</div>';
                 return;
@@ -484,7 +628,28 @@
             }
 
             let html = `<div class="stats">총 ${places.length}개의 장소를 찾았습니다!</div>`;
-            
+
+            // Show detailed search timing for first result (they all have same timing)
+            if (places.length > 0 && places[0].search_timings) {
+                html += `
+                    <div class="timing-info">
+                        <h4>📊 점진적 반경 검색 상세</h4>
+                        <div class="timing-step"><strong>전체 검색 시간:</strong> ${places[0].total_search_time}초</div>
+                `;
+
+                places[0].search_timings.forEach(timing => {
+                    html += `
+                        <div class="timing-step">
+                            <strong>${timing.radius}m 반경:</strong> 
+                            API ${timing.api_time}초, 처리 ${timing.processing_time}초 
+                            (새 결과 ${timing.new_results}개, 누적 ${timing.total_results}개)
+                        </div>
+                    `;
+                });
+
+                html += `</div>`;
+            }
+
             places.forEach(place => {
                 let distanceText = '';
                 if (userLocation && place.distance) {
@@ -513,17 +678,31 @@
 
         function search() {
             const koreanText = document.getElementById('koreanInput').value;
-            const location = document.getElementById('locationInput').value;
-            const radius = parseInt(document.getElementById('radiusInput').value);
 
             if (!koreanText) {
                 showMessage('한국어 검색어를 입력해주세요.', 'error');
                 return;
             }
 
-            showMessage('🔍 AI가 키워드를 생성하고 검색 중입니다...', 'info');
+            // GPS 없으면 그냥 에러
+            if (!userLocation) {
+                showMessage('❌ GPS 위치가 필요합니다. 브라우저에서 위치 접근을 허용하고 새로고침하세요.', 'error');
+                return;
+            }
+
+            const location = `${userLocation.lat},${userLocation.lng}`;
+            const radius = 500; // 🎯 백엔드 SEARCH_RADIUS와 동일하게 유지
+
+            console.log(`[GPS] 현재 위치에서 검색: ${userLocation.lat}, ${userLocation.lng}`);
+            showMessage(`🎯 현재 위치에서 ${radius}m 반경 검색 중...`, 'info');
+
+            // Show loading indicator with progress steps
+            showLoadingIndicator();
             clearMarkers();
-            
+
+            // Start search with progress tracking
+            const startTime = Date.now();
+
             fetch('/search', {
                 method: 'POST',
                 headers: {
@@ -535,50 +714,67 @@
                     radius: radius
                 })
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    showMessage(data.error, 'error');
-                    return;
-                }
-
-                showMessage(`✅ 검색 완료! ${data.total_results}개의 장소를 찾았습니다.`, 'success');
-                
-                // Show keywords
-                showKeywords(data.keywords);
-                
-                // Show cost information
-                showCostInfo(data.keywords);
-                
-                // Show results
-                showResults(data.places);
-                
-                // Add markers to map
-                if (data.places.length > 0) {
-                    data.places.forEach(place => addMarker(place));
-                    
-                    // Add user location marker if available
-                    addUserLocationMarker();
-                    
-                    // Center map appropriately
-                    if (userLocation) {
-                        map.setCenter(userLocation);
-                        map.setZoom(14);
-                    } else {
-                        const firstPlace = data.places[0];
-                        map.setCenter({ lat: firstPlace.lat, lng: firstPlace.lng });
-                        map.setZoom(13);
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        showMessage(data.error, 'error');
+                        return;
                     }
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showMessage('검색 중 오류가 발생했습니다.', 'error');
-            });
+
+                    // Update final progress
+                    updateProgress(4, '✅ 검색 완료!', true);
+
+                    const totalTime = (Date.now() - startTime) / 1000;
+                    setTimeout(() => {
+                        showMessage(`✅ 검색 완료! ${data.total_results}개의 장소를 찾았습니다. (총 ${totalTime.toFixed(1)}초)`, 'success');
+
+                        // Show keywords
+                        showKeywords(data.keywords);
+
+                        // Show cost information
+                        showCostInfo(data.keywords);
+
+                        // Show timing information
+                        showTimingInfo(data.keywords);
+
+                        // Show results
+                        showResults(data.places);
+                    }, 500);
+
+                    // Add markers to map
+                    if (data.places.length > 0) {
+                        data.places.forEach(place => addMarker(place));
+
+                        // Add user location marker if available
+                        addUserLocationMarker();
+
+                        // Center map appropriately
+                        if (userLocation) {
+                            map.setCenter(userLocation);
+                            map.setZoom(14);
+                        } else {
+                            const firstPlace = data.places[0];
+                            map.setCenter({ lat: firstPlace.lat, lng: firstPlace.lng });
+                            map.setZoom(13);
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showMessage('검색 중 오류가 발생했습니다.', 'error');
+                });
+
+            // Simulate progress updates (since we can't get real-time updates from Flask)
+            setTimeout(() => updateProgress(1, '✅ AI 키워드 생성 완료', true), 1000);
+            setTimeout(() => updateProgress(2, '🔍 추상 번역 검색 중...', false), 1500);
+            setTimeout(() => updateProgress(2, '✅ 추상 번역 검색 완료', true), 3000);
+            setTimeout(() => updateProgress(3, '🔍 카테고리 검색 중...', false), 3500);
+            setTimeout(() => updateProgress(3, '✅ 카테고리 검색 완료', true), 5000);
+            setTimeout(() => updateProgress(4, '📊 결과 정리 중...', false), 5500);
         }
 
         // Enter key support
-        document.getElementById('koreanInput').addEventListener('keypress', function(e) {
+        document.getElementById('koreanInput').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
                 search();
             }
@@ -599,4 +795,5 @@
             .catch(error => console.error('Error loading Google Maps:', error));
     </script>
 </body>
+
 </html>
